@@ -1,0 +1,47 @@
+name: FlowSentinel Daily Pipeline
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate sample data if needed
+        run: python -m flowsentinel.sample_data.generate_sample_data --records 50000
+        env:
+          PYTHONPATH: src
+
+      - name: Run pipeline
+        run: python run_pipeline.py
+        env:
+          PYTHONPATH: src
+
+      - name: Run tests
+        run: pytest -v --tb=short
+        env:
+          PYTHONPATH: src
+
+      - name: Upload reporting artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: flowsentinel-artifacts
+          path: |
+            outputs/*.pdf
+            data/processed/*.csv
+
