@@ -1,0 +1,51 @@
+{
+  "name": "FlowSentinel Exception Routing",
+  "description": "Reference Power Automate flow definition for routing high-severity exceptions to Microsoft Teams, Outlook, and SharePoint.",
+  "trigger": {
+    "type": "When an HTTP request is received",
+    "method": "POST",
+    "schema": {
+      "type": "object",
+      "properties": {
+        "source": {"type": "string"},
+        "timestamp": {"type": "string"},
+        "record_id": {"type": "string"},
+        "rule_id": {"type": "string"},
+        "description": {"type": "string"},
+        "field": {"type": "string"},
+        "severity": {"type": "string"},
+        "team": {"type": "string"}
+      },
+      "required": ["record_id", "rule_id", "severity", "team"]
+    }
+  },
+  "actions": [
+    {
+      "name": "Condition: High Severity",
+      "type": "Condition",
+      "expression": "@equals(triggerBody()?['severity'], 'HIGH')"
+    },
+    {
+      "name": "Post to Teams",
+      "type": "MicrosoftTeams.PostMessage",
+      "channelByTeam": {
+        "finance": "Finance Ops",
+        "logistics": "Logistics Command",
+        "operations": "Ops Control",
+        "hr": "People Operations",
+        "sales": "Sales Operations"
+      }
+    },
+    {
+      "name": "Create SharePoint Item",
+      "type": "SharePoint.CreateItem",
+      "list": "FlowSentinel Exceptions"
+    },
+    {
+      "name": "Send Outlook Email",
+      "type": "Outlook.SendEmailV2",
+      "subject": "FlowSentinel critical exception detected"
+    }
+  ]
+}
+
