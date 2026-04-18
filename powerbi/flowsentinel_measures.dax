@@ -1,0 +1,27 @@
+Health Score = AVERAGE('daily_health_summary'[composite_score])
+
+Records Processed = SUM('daily_health_summary'[total_records])
+
+Completeness % = AVERAGE('daily_health_summary'[completeness])
+
+Error-Free % = AVERAGE('daily_health_summary'[error_rate])
+
+Anomaly-Free % = AVERAGE('daily_health_summary'[anomaly_rate])
+
+Exceptions = COUNTROWS('exceptions')
+
+High Severity Exceptions =
+CALCULATE(
+    COUNTROWS('exceptions'),
+    'exceptions'[severity] = "HIGH"
+)
+
+Flagged Record Rate % =
+DIVIDE(
+    CALCULATE(COUNTROWS('records'), 'records'[has_violation] = 1),
+    COUNTROWS('records'),
+    0
+) * 100
+
+Avg Processing Time (ms) = AVERAGE('records'[processing_time_ms])
+
